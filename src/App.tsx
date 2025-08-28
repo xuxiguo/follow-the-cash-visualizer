@@ -249,205 +249,287 @@ export default function App() {
   const systemCash = firmCash + investorCash + govStakeCash;
 
   return (
-    <div className="min-h-screen w-full bg-slate-50 text-slate-800 p-6">
-      <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-6">
-        {/* Controls */}
-        <div className="lg:col-span-1 bg-white rounded-2xl shadow p-5 space-y-4">
-          <h1 className="text-2xl font-semibold">Follow the Cash (A→C→D→B/F)</h1>
-          <p className="text-sm text-slate-600">
-            C is <strong>free cash flow from assets</strong> this cycle. After D (taxes &
-            stakeholders), allocate distributable cash across <strong>Invest in Assets (B)</strong>,
-            <strong> Pay Financial Markets (F)</strong>, and <strong>Retain in Firm cash</strong>.
+    <div className="min-h-screen w-full bg-gray-50 text-gray-800 p-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Follow the Cash (A→C→D→B/F)</h1>
+          <p className="text-sm text-gray-600">
+            C is <strong>free cash flow from assets</strong> this cycle. After D (taxes & stakeholders), 
+            allocate distributable cash across <strong>Invest in Assets (B)</strong>, <strong>Pay Financial Markets (F)</strong>, 
+            and <strong>Retain in Firm cash</strong>.
           </p>
+        </div>
 
-          {/* Mode toggle */}
-          <div className="inline-flex rounded-xl overflow-hidden border">
-            <button
-              className={`px-3 py-1 text-sm ${
-                mode === "simple" ? "bg-slate-900 text-white" : "bg-white"
-              }`}
-              onClick={() => setMode("simple")}
-            >
-              Simple Output
-            </button>
-            <button
-              className={`px-3 py-1 text-sm ${
-                mode === "animated" ? "bg-slate-900 text-white" : "bg-white"
-              }`}
-              onClick={() => setMode("animated")}
-            >
-              Animated Flow
-            </button>
-          </div>
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Left Panel - Controls */}
+          <div className="lg:col-span-1 space-y-4">
+            {/* Mode Toggle */}
+            <div className="bg-white rounded-lg shadow-sm border p-4">
+              <div className="flex rounded-lg overflow-hidden border border-gray-200">
+                <button
+                  className={`flex-1 px-4 py-2 text-sm font-medium ${
+                    mode === "simple" 
+                      ? "bg-gray-800 text-white" 
+                      : "bg-white text-gray-700 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setMode("simple")}
+                >
+                  Simple Output
+                </button>
+                <button
+                  className={`flex-1 px-4 py-2 text-sm font-medium ${
+                    mode === "animated" 
+                      ? "bg-gray-800 text-white" 
+                      : "bg-white text-gray-700 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setMode("animated")}
+                >
+                  Animated Flow
+                </button>
+              </div>
+            </div>
 
-          {/* Start balances */}
-          <div className="rounded-xl border p-3">
-            <div className="text-sm font-semibold mb-1">Starting balances</div>
-            <Slider
-              label={`Starting Firm Cash (${fmt(startFirm)})`}
-              value={startFirm}
-              setValue={setStartFirm}
-              min={0}
-              max={300}
-            />
-            <Slider
-              label={`Starting Assets (${fmt(startAssets)})`}
-              value={startAssets}
-              setValue={setStartAssets}
-              min={0}
-              max={500}
-            />
-            <button
-              onClick={applyStarts}
-              className="mt-2 px-3 py-1 rounded-lg bg-slate-100 border"
-            >
-              Apply to current
-            </button>
-          </div>
+            {/* Starting Balances */}
+            <div className="bg-white rounded-lg shadow-sm border p-4">
+              <h3 className="font-semibold text-gray-900 mb-3">Starting balances</h3>
+              <div className="space-y-3">
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Starting Firm Cash ({fmt(startFirm)})</span>
+                    <span className="font-medium">{startFirm}</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer slider-thumb:appearance-none slider-thumb:w-4 slider-thumb:h-4 slider-thumb:rounded-full slider-thumb:bg-blue-600" 
+                    value={startFirm} 
+                    onChange={(e) => setStartFirm(Number(e.target.value))} 
+                    min={0} 
+                    max={300} 
+                  />
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Starting Assets ({fmt(startAssets)})</span>
+                    <span className="font-medium">{startAssets}</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer slider-thumb:appearance-none slider-thumb:w-4 slider-thumb:h-4 slider-thumb:rounded-full slider-thumb:bg-blue-600" 
+                    value={startAssets} 
+                    onChange={(e) => setStartAssets(Number(e.target.value))} 
+                    min={0} 
+                    max={500} 
+                  />
+                </div>
+                <button
+                  onClick={applyStarts}
+                  className="px-3 py-1.5 text-sm bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200"
+                >
+                  Apply to current
+                </button>
+              </div>
+            </div>
 
-          {/* Policy sliders */}
-          <Slider
-            label={`A. New Issue (${fmt(issueAmount)})`}
-            value={issueAmount}
-            setValue={setIssueAmount}
-            min={0}
-            max={300}
-          />
-          <Slider
-            label={`C. Asset FCF Yield ${opMargin}%`}
-            value={opMargin}
-            setValue={setOpMargin}
-            min={-40}
-            max={60}
-          />
-          <Slider
-            label={`D. Tax & Stakeholder ${taxStakePct}%`}
-            value={taxStakePct}
-            setValue={setTaxStakePct}
-            min={0}
-            max={80}
-          />
+            {/* Controls */}
+            <div className="bg-white rounded-lg shadow-sm border p-4 space-y-3">
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span>A. New Issue ({fmt(issueAmount)})</span>
+                  <span className="font-medium">{issueAmount}</span>
+                </div>
+                <input 
+                  type="range" 
+                  className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer" 
+                  value={issueAmount} 
+                  onChange={(e) => setIssueAmount(Number(e.target.value))} 
+                  min={0} 
+                  max={300} 
+                />
+              </div>
+              
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span>C. Asset FCF Yield {opMargin}%</span>
+                  <span className="font-medium">{opMargin}</span>
+                </div>
+                <input 
+                  type="range" 
+                  className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer" 
+                  value={opMargin} 
+                  onChange={(e) => setOpMargin(Number(e.target.value))} 
+                  min={-40} 
+                  max={60} 
+                />
+              </div>
+              
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span>D. Tax & Stakeholder {taxStakePct}%</span>
+                  <span className="font-medium">{taxStakePct}</span>
+                </div>
+                <input 
+                  type="range" 
+                  className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer" 
+                  value={taxStakePct} 
+                  onChange={(e) => setTaxStakePct(Number(e.target.value))} 
+                  min={0} 
+                  max={80} 
+                />
+              </div>
+            </div>
 
-          {/* Allocation Section (post‑C) */}
-          <div className="rounded-xl border p-3 space-y-2">
-            <div className="text-sm font-semibold">Post‑C Allocation (must equal 100%)</div>
-            <Slider
-              label={`Invest in Assets (B): ${bCapexPct}%`}
-              value={bCapexPct}
-              setValue={onChangeBCapex}
-              min={0}
-              max={100}
-            />
-            <Slider
-              label={`Pay Financial Markets (F): ${fPayoutPct}%`}
-              value={fPayoutPct}
-              setValue={onChangeFPayout}
-              min={0}
-              max={100}
-            />
-            <div className="text-xs text-slate-600">
-              Keep in Firm Cash (auto): <span className="font-semibold">{retainPct}%</span>
+            {/* Post-C Allocation */}
+            <div className="bg-white rounded-lg shadow-sm border p-4">
+              <h3 className="font-semibold text-gray-900 mb-3">Post‑C Allocation (must equal 100%)</h3>
+              <div className="space-y-3">
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Invest in Assets (B): {bCapexPct}%</span>
+                    <span className="font-medium">{bCapexPct}</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer" 
+                    value={bCapexPct} 
+                    onChange={(e) => onChangeBCapex(Number(e.target.value))} 
+                    min={0} 
+                    max={100} 
+                  />
+                </div>
+                
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Pay Financial Markets (F): {fPayoutPct}%</span>
+                    <span className="font-medium">{fPayoutPct}</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer" 
+                    value={fPayoutPct} 
+                    onChange={(e) => onChangeFPayout(Number(e.target.value))} 
+                    min={0} 
+                    max={100} 
+                  />
+                </div>
+                
+                <div className="text-sm text-gray-600">
+                  Keep in Firm Cash (auto): <span className="font-semibold">{retainPct}%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="bg-white rounded-lg shadow-sm border p-4">
+              <div className="space-y-2">
+                {mode === "simple" ? (
+                  <button
+                    onClick={runSimpleRound}
+                    className="w-full px-4 py-2.5 bg-gray-800 text-white rounded-lg hover:bg-gray-700 font-medium"
+                  >
+                    Run Simple Round #{round}
+                  </button>
+                ) : (
+                  <button
+                    onClick={runAnimatedRound}
+                    disabled={playing}
+                    className="w-full px-4 py-2.5 bg-gray-800 text-white rounded-lg hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+                  >
+                    Run Animated Round #{round}
+                  </button>
+                )}
+                <button
+                  onClick={resetGame}
+                  className="w-full px-4 py-2.5 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 font-medium"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            {/* Self Tests */}
+            <div className="bg-white rounded-lg shadow-sm border p-4">
+              <h3 className="font-semibold text-gray-900 mb-3">Self‑tests</h3>
+              <div className="space-y-1">
+                {testResults.map((t, i) => (
+                  <div
+                    key={i}
+                    className={`text-xs flex items-center ${
+                      t.pass ? "text-green-700" : "text-red-700"
+                    }`}
+                  >
+                    <span className="mr-1">•</span>
+                    <span className="font-medium mr-1">{t.pass ? "PASS" : "FAIL"}</span>
+                    <span>— {t.name} {t.detail ? `(${t.detail})` : ""}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          <div className="flex gap-2 pt-2">
+          {/* Right Panel - Visualization */}
+          <div className="lg:col-span-2">
             {mode === "simple" ? (
-              <button
-                onClick={runSimpleRound}
-                className="px-4 py-2 rounded-xl bg-slate-900 text-white hover:opacity-90"
-              >
-                Run Simple Round #{round}
-              </button>
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <h2 className="text-xl font-semibold mb-4">Simple Output</h2>
+                <OutputTable script={steps} />
+                
+                <div className="mt-6">
+                  <h3 className="font-semibold mb-4">Balances (after round)</h3>
+                  <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                    <StatCard title="Firm Cash" value={firmCash} />
+                    <StatCard title="Assets (book)" value={assets} />
+                    <StatCard title="Financial Markets" value={investorCash} />
+                    <StatCard title="Gov & Stakeholders" value={govStakeCash} />
+                    <StatCard title="System Cash" value={systemCash} />
+                  </div>
+                  <div className="mt-4">
+                    <StatCard title="Cumulative cash generated (Σ max(C,0))" value={cumCashGen} />
+                  </div>
+                </div>
+              </div>
             ) : (
-              <button
-                onClick={runAnimatedRound}
-                disabled={playing}
-                className="px-4 py-2 rounded-xl bg-slate-900 text-white hover:opacity-90 disabled:opacity-50"
-              >
-                Run Animated Round #{round}
-              </button>
+              <div className="space-y-6">
+                {/* Animated Flow */}
+                <div className="bg-white rounded-lg shadow-sm border p-6">
+                  <h2 className="text-xl font-semibold mb-4">Animated Flow</h2>
+                  <FlowMap
+                    steps={steps}
+                    activeIdx={activeIdx}
+                    firm={firmCash}
+                    investors={investorCash}
+                    govstake={govStakeCash}
+                    assets={assets}
+                  />
+                </div>
+
+                {/* Balances */}
+                <div className="bg-white rounded-lg shadow-sm border p-6">
+                  <h3 className="font-semibold mb-4">Balances</h3>
+                  <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+                    <StatCard title="Firm Cash" value={firmCash} />
+                    <StatCard title="Assets (book)" value={assets} />
+                    <StatCard title="Financial Markets" value={investorCash} />
+                    <StatCard title="Gov & Stakeholders" value={govStakeCash} />
+                    <StatCard title="System Cash" value={systemCash} />
+                  </div>
+                  <StatCard title="Cumulative cash generated (Σ max(C,0))" value={cumCashGen} />
+                </div>
+
+                {/* Round Log */}
+                <div className="bg-white rounded-lg shadow-sm border p-6">
+                  <h3 className="font-semibold mb-4">Round Log</h3>
+                  <div className="h-48 overflow-auto text-sm bg-gray-50 border rounded-lg p-3 space-y-1">
+                    {log.map((l, i) => (
+                      <div key={i} className="text-gray-700">{l}</div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             )}
-            <button
-              onClick={resetGame}
-              className="px-4 py-2 rounded-xl bg-slate-100 border"
-            >
-              Reset
-            </button>
           </div>
-
-          {/* Tests */}
-          <div className="mt-3 rounded-xl border p-3 bg-slate-50">
-            <div className="text-sm font-semibold">Self‑tests</div>
-            {testResults.map((t, i) => (
-              <div
-                key={i}
-                className={`text-xs mt-1 ${
-                  t.pass ? "text-green-700" : "text-red-700"
-                }`}
-              >
-                • {t.pass ? "PASS" : "FAIL"} — {t.name} {t.detail ? `(${t.detail})` : ""}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Output area */}
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow p-5">
-          {mode === "simple" ? (
-            <>
-              <h2 className="text-xl font-semibold">Simple Output</h2>
-              <OutputTable script={steps} />
-              <h3 className="mt-6 font-semibold">Balances (after round)</h3>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                <Stat title="Firm Cash" value={firmCash} />
-                <Stat title="Assets (book)" value={assets} />
-                <Stat title="Financial Markets (Investors) Cash" value={investorCash} />
-                <Stat title="Gov & Stakeholders" value={govStakeCash} />
-                <Stat title="System Cash (F+Markets+Gov)" value={systemCash} />
-              </div>
-              <div className="mt-3 grid sm:grid-cols-2 lg:grid-cols-2 gap-3">
-                <Stat title="Cumulative cash generated (Σ max(C,0))" value={cumCashGen} />
-              </div>
-            </>
-          ) : (
-            <>
-              <h2 className="text-2xl font-semibold">Animated Flow</h2>
-              <FlowMap
-                steps={steps}
-                activeIdx={activeIdx}
-                firm={firmCash}
-                investors={investorCash}
-                govstake={govStakeCash}
-                assets={assets}
-              />
-
-              <h3 className="mt-6 font-semibold">Balances</h3>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                <Stat title="Firm Cash" value={firmCash} />
-                <Stat title="Assets (book)" value={assets} />
-                <Stat title="Financial Markets" value={investorCash} />
-                <Stat title="Gov & Stakeholders" value={govStakeCash} />
-                <Stat title="System Cash (F+Markets+Gov)" value={systemCash} />
-              </div>
-
-              <div className="mt-3 grid sm:grid-cols-2 lg:grid-cols-2 gap-3">
-                <Stat title="Cumulative cash generated (Σ max(C,0))" value={cumCashGen} />
-              </div>
-
-              <h3 className="mt-6 font-semibold">Round Log</h3>
-              <div className="h-56 overflow-auto text-sm bg-slate-50 border rounded-xl p-3 space-y-1">
-                {log.map((l, i) => (
-                  <div key={i}>{l}</div>
-                ))}
-              </div>
-            </>
-          )}
         </div>
       </div>
-
-      <footer className="max-w-6xl mx-auto mt-6 text-xs text-slate-500">
-        Sequence: A Issue → C FCF → D Tax/Stake → allocate → B Invest in Assets → F Pay Financial Markets; remainder stays as Firm cash.
-      </footer>
     </div>
   );
 }
@@ -726,35 +808,11 @@ function FlowMap({
 }
 
 // ---------------------- UI helpers & Tests ----------------------
-function Stat({ title, value }: { title: string; value: number }) {
+function StatCard({ title, value }: { title: string; value: number }) {
   return (
-    <div className="rounded-xl border p-4">
-      <div className="text-xs text-slate-500">{title}</div>
-      <div className="text-2xl font-semibold">${Math.round(value)}</div>
-    </div>
-  );
-}
-
-function Slider({
-  label,
-  value,
-  setValue,
-  min,
-  max,
-}: {
-  label: string;
-  value: number;
-  setValue: (v: number) => void;
-  min: number;
-  max: number;
-}) {
-  return (
-    <div>
-      <div className="flex justify-between text-sm">
-        <span>{label}</span>
-        <span className="font-medium">{typeof value === "number" ? value : ""}</span>
-      </div>
-      <input type="range" className="w-full" value={value} onChange={(e) => setValue(Number(e.target.value))} min={min} max={max} />
+    <div className="bg-gray-50 rounded-lg border p-4">
+      <div className="text-xs text-gray-500 mb-1">{title}</div>
+      <div className="text-lg font-semibold text-gray-900">${Math.round(value)}</div>
     </div>
   );
 }
