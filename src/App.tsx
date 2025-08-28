@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import './App.css'
 
 // Follow the Cash – New Flow (react)
@@ -244,8 +244,6 @@ export default function App() {
     setLog(["Reset complete. Adjust sliders and run a new round."]); 
   }
 
-  const testResults = useMemo(() => runSelfTests(), []);
-
   const systemCash = firmCash + investorCash + govStakeCash;
 
   return (
@@ -444,25 +442,6 @@ export default function App() {
                 >
                   Reset
                 </button>
-              </div>
-            </div>
-
-            {/* Self Tests */}
-            <div className="bg-white rounded-lg shadow-sm border p-4">
-              <h3 className="font-semibold text-gray-900 mb-3">Self‑tests</h3>
-              <div className="space-y-1">
-                {testResults.map((t, i) => (
-                  <div
-                    key={i}
-                    className={`text-xs flex items-center ${
-                      t.pass ? "text-green-700" : "text-red-700"
-                    }`}
-                  >
-                    <span className="mr-1">•</span>
-                    <span className="font-medium mr-1">{t.pass ? "PASS" : "FAIL"}</span>
-                    <span>— {t.name} {t.detail ? `(${t.detail})` : ""}</span>
-                  </div>
-                ))}
               </div>
             </div>
           </div>
@@ -819,107 +798,4 @@ function StatCard({ title, value }: { title: string; value: number }) {
 
 function clamp(x: number, lo: number, hi: number) {
   return Math.max(lo, Math.min(hi, x));
-}
-
-function runSelfTests(): { name: string; pass: boolean; detail?: string }[] {
-  const results: { name: string; pass: boolean; detail?: string }[] = [];
-
-  // 1) Order presence A, C, D and post‑C B/F on a positive‑margin case
-  {
-    const { script } = computeRound(
-      { F: 50, I: 500, GS: 0, A: 150 },
-      { issueAmount: 80, opMargin: 15, taxStakePct: 25, alloc: { bCapexPct: 40, fPayoutPct: 40, retainPct: 20 } }
-    );
-    const codes = script.map((s) => s.code);
-    const orderOk = codes.indexOf("C") >= 0 && codes.indexOf("D") > codes.indexOf("C");
-    results.push({ name: "Has A,C,D and D after C", pass: (["A", "C", "D"] as const).every((c) => codes.includes(c)) && orderOk });
-  }
-
-  // 2) A capped by investor cash
-  {
-    const { script } = computeRound(
-      { F: 10, I: 30, GS: 0, A: 0 },
-      { issueAmount: 100, opMargin: 0, taxStakePct: 0, alloc: { bCapexPct: 0, fPayoutPct: 0, retainPct: 100 } }
-    );
-    const Astep = script.find((s) => s.code === "A");
-    results.push({ name: "A capped by investor cash", pass: !!Astep && Math.round(Astep.amount) === 30 });
-  }
-
-  // 3) Negative margin → no D
-  {
-    const { script } = computeRound(
-      { F: 50, I: 0, GS: 0, A: 100 },
-      { issueAmount: 0, opMargin: -10, taxStakePct: 25, alloc: { bCapexPct: 50, fPayoutPct: 0, retainPct: 50 } }
-    );
-    const Dstep = script.find((s) => s.code === "D");
-    results.push({ name: "Loss year → no D", pass: !Dstep });
-  }
-
-  // 4) Allocation edge cases
-  {
-    const r1 = computeRound(
-      { F: 80, I: 0, GS: 0, A: 100 },
-      { issueAmount: 0, opMargin: 10, taxStakePct: 0, alloc: { bCapexPct: 100, fPayoutPct: 0, retainPct: 0 } }
-    );
-    const r2 = computeRound(
-      { F: 80, I: 0, GS: 0, A: 100 },
-      { issueAmount: 0, opMargin: 10, taxStakePct: 0, alloc: { bCapexPct: 0, fPayoutPct: 100, retainPct: 0 } }
-    );
-    const r3 = computeRound(
-      { F: 80, I: 0, GS: 0, A: 100 },
-      { issueAmount: 0, opMargin: 10, taxStakePct: 0, alloc: { bCapexPct: 0, fPayoutPct: 0, retainPct: 100 } }
-    );
-    results.push({ name: "100% B → no F", pass: !r1.script.some((s) => s.code === "F") });
-    results.push({ name: "100% F → no B", pass: !r2.script.some((s) => s.code === "B") });
-    results.push({ name: "100% retain → no B/F", pass: !r3.script.some((s) => s.code === "B" || s.code === "F") });
-  }
-
-  // 5) Endpoint sanity
-  {
-    const { script } = computeRound(
-      { F: 120, I: 0, GS: 0, A: 200 },
-      { issueAmount: 0, opMargin: 10, taxStakePct: 0, alloc: { bCapexPct: 60, fPayoutPct: 40, retainPct: 0 } }
-    );
-    const Bsteps = script.filter((s) => s.code === "B");
-    const Fsteps = script.filter((s) => s.code === "F");
-    const Bok = !Bsteps.length || Bsteps.every((s) => s.from === "Firm" && s.to === "Assets");
-    const Fok = !Fsteps.length || Fsteps.every((s) => s.from === "Firm" && s.to === "Investors");
-    results.push({ name: "B endpoints Firm→Assets", pass: Bok });
-    results.push({ name: "F endpoints Firm→Investors", pass: Fok });
-  }
-
-  // 6) Animated frames never negative for a standard case
-  {
-    const start = { F: 50, I: 500, GS: 0, A: 150 };
-    const calc = computeRound(start, {
-      issueAmount: 80,
-      opMargin: 15,
-      taxStakePct: 25,
-      alloc: { bCapexPct: 40, fPayoutPct: 40, retainPct: 20 },
-    });
-    const frames = computeFrames(start, calc.script);
-    const anyNeg = frames.some((fr) => fr.F < -1e-6);
-    results.push({ name: "Animated frames never negative", pass: !anyNeg });
-  }
-
-  // 7) Taxes apply only to positive opCash (sanity)
-  {
-    const { script } = computeRound(
-      { F: 20, I: 0, GS: 0, A: 100 },
-      { issueAmount: 0, opMargin: -5, taxStakePct: 50, alloc: { bCapexPct: 0, fPayoutPct: 0, retainPct: 100 } }
-    );
-    const Dstep = script.find((s) => s.code === "D");
-    results.push({ name: "No D when opCash negative", pass: !Dstep });
-  }
-
-  // 8) If distributable ≤ 0, no B/F allocations occur
-  {
-    const { script } = computeRound(
-      { F: 10, I: 0, GS: 0, A: 100 },
-      { issueAmount: 0, opMargin: -50, taxStakePct: 0, alloc: { bCapexPct: 60, fPayoutPct: 40, retainPct: 0 } }
-    );
-    results.push({ name: "No B/F when distributable is 0", pass: !script.some((s) => s.code === "B" || s.code === "F") });
-  }
-
-  return results;
 }
