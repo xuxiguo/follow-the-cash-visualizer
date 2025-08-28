@@ -62,11 +62,11 @@ function computeRound(
 
   // Build script in the narrative order: A → C → D → (allocate) → B/F
   const script: FlowStep[] = [
-    { code: "A" as const, from: "Investors", to: "Firm", amount: payA, note: "Issue securities" },
-    { code: "C" as const, from: "Assets", to: "Firm", amount: opCash, note: "Free cash flow from assets (this cycle)" },
-    { code: "D" as const, from: "Firm", to: "GovStake", amount: taxStake, note: "Taxes & other stakeholders" },
-    { code: "B" as const, from: "Firm", to: "Assets", amount: bCapex, note: `Invest in assets (allocation ${alloc.bCapexPct}%)` },
-    { code: "F" as const, from: "Firm", to: "Investors", amount: fPayout, note: `Pay financial markets (allocation ${alloc.fPayoutPct}%)` },
+    { code: "A" as const, from: "Investors" as const, to: "Firm" as const, amount: payA, note: "Issue securities" },
+    { code: "C" as const, from: "Assets" as const, to: "Firm" as const, amount: opCash, note: "Free cash flow from assets (this cycle)" },
+    { code: "D" as const, from: "Firm" as const, to: "GovStake" as const, amount: taxStake, note: "Taxes & other stakeholders" },
+    { code: "B" as const, from: "Firm" as const, to: "Assets" as const, amount: bCapex, note: `Invest in assets (allocation ${alloc.bCapexPct}%)` },
+    { code: "F" as const, from: "Firm" as const, to: "Investors" as const, amount: fPayout, note: `Pay financial markets (allocation ${alloc.fPayoutPct}%)` },
   ].filter((s) => s.amount > 0);
 
   return {

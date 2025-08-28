@@ -7,37 +7,85 @@ Currently, two official plugins are available:
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Expanding the ESLint configuration
+# Follow the Cash Visualizer
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+An interactive cash flow visualization tool that demonstrates the sequence: **A → C → D → B/F** for understanding corporate cash flow allocation.
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🚀 Live Demo
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+Visit: [https://xuxiguo.github.io/follow-the-cash-visualizer/](https://xuxiguo.github.io/follow-the-cash-visualizer/)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 📈 Features
+
+- **Interactive Cash Flow Simulation**: Adjust parameters and watch cash flow in real-time
+- **Animated Visualization**: SVG-based animation showing cash movements between entities
+- **Dual Display Modes**: 
+  - Simple tabular output
+  - Animated flow diagram
+- **Educational Tools**: Built-in self-tests and validation
+- **Professional UI**: Clean, responsive design with Tailwind CSS
+
+## 🔄 Cash Flow Sequence
+
+1. **A - Issue Securities**: Financial markets → Firm cash
+2. **C - Free Cash Flow**: Assets → Firm cash (can be positive or negative)
+3. **D - Taxes & Stakeholders**: Firm cash → Government & Stakeholders (only on positive C)
+4. **B - Invest in Assets**: Firm cash → Assets (allocation %)
+5. **F - Pay Financial Markets**: Firm cash → Financial markets (allocation %)
+6. **Retain**: Remaining cash stays in Firm cash
+
+## 🎛️ Controls
+
+- **Starting Balances**: Set initial firm cash and assets
+- **Issue Amount (A)**: New securities issued from financial markets
+- **Asset FCF Yield (C)**: Percentage return on assets (can be negative)
+- **Tax & Stakeholder Rate (D)**: Percentage of positive cash flow to government/stakeholders
+- **Post-C Allocation**: Distribute available cash between:
+  - Invest in Assets (B)
+  - Pay Financial Markets (F)
+  - Retain in Firm Cash (auto-calculated remainder)
+
+## 🛠️ Development
+
+Built with:
+- **React 18** + **TypeScript**
+- **Vite** for build tooling
+- **Tailwind CSS** for styling
+- **SVG animations** for cash flow visualization
+
+### Local Development
+
+```bash
+npm install
+npm run dev
 ```
+
+### Build for Production
+
+```bash
+npm run build
+npm run preview
+```
+
+## 📊 Educational Context
+
+This visualizer helps students understand:
+- Corporate cash flow allocation decisions
+- The relationship between operational cash generation and investment/financing decisions
+- How cash flows between different corporate stakeholders
+- The impact of various financial policies on cash distribution
+
+## 🔬 Validation
+
+The application includes comprehensive self-tests that verify:
+- Correct sequence ordering (A → C → D → B/F)
+- Proper handling of negative cash flows
+- Allocation logic constraints
+- Mathematical accuracy of cash flow calculations
+
+---
+
+*Part of FIN3010 Financial Management course materials*
 
 You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
